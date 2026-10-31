@@ -1,7 +1,7 @@
 {
   "id": "neobase.cascade",
   "name": "Cascade",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "NDesumeur",
   "description": "Des éclats tombent dans un puits de 10 × 20 : complète des lignes pour les briser.",
   "icon": "icon.png",
