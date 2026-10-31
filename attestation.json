@@ -1,0 +1,9 @@
+{
+  "pluginId": "neobase.cascade",
+  "repo": "NDesumeur/neobase-plugin-cascade",
+  "version": "1.0.0",
+  "sha256": "fe39ea13eb786e91d414cb74e104a3f3104d394f88e2dcaf032db241fcf34a75",
+  "approvedAt": "2026-10-31T16:22:01.594Z",
+  "neobase": ">=4.0.0",
+  "signature": "1rKtmSWyFOuGtcKDcGK/bW4QEwHNEl9Rh2V7CUDsViCmerzjRKKK+WicDT79w77dGYG1u4fQX/mYuz/yyEqMCA=="
+}
