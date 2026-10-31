@@ -1,0 +1,19 @@
+{
+  "id": "neobase.cascade",
+  "name": "Cascade",
+  "version": "1.0.0",
+  "author": "NDesumeur",
+  "description": "Des éclats tombent dans un puits de 10 × 20 : complète des lignes pour les briser.",
+  "icon": "icon.png",
+  "entry": "index.js",
+  "view": "cascade",
+  "neobase": ">=4.0.0",
+  "type": "app",
+  "category": "Jeux",
+  "mobile": false,
+  "system": false,
+  "dependencies": {},
+  "permissions": [
+    "full"
+  ]
+}
