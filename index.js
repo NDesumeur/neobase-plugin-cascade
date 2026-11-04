@@ -1,16 +1,16 @@
 // Cascade : ton appli d'origine (HTML et code inchangés), livrée en plugin.
-// Ses données sont dans le dossier du plugin, que NeoBase sauvegarde (synchro cloud et sauvegardes) ; à la première ouverture elle reprend ce que tu avais dans NeoBase.
-// Elle tourne dans le bac à sable de NeoBase, avec ses outils d'interface (ctx.host) et seulement les autorisations de son plugin.json.
+// Ses données sont dans le dossier du plugin, que NeoDex sauvegarde (synchro cloud et sauvegardes) ; à la première ouverture elle reprend ce que tu avais dans NeoDex.
+// Elle tourne dans le bac à sable de NeoDex, avec ses outils d'interface (ctx.host) et seulement les autorisations de son plugin.json.
 const HTML = "<div class=\"appWrap\">\n      <div class=\"agHead\"><span class=\"label\">Cascade</span><span class=\"hint\" id=\"caInfo\"></span><div class=\"agNav\"><select class=\"f gSel\" id=\"caMode\" title=\"Mode de jeu\"></select></div></div>\n      <div class=\"gameBox tall\"><canvas id=\"caCanvas\" width=\"240\" height=\"320\" tabindex=\"0\"></canvas></div>\n      <div class=\"hint\">← → ou Q D : déplacer · ↑, X ou W : tourner (Z : dans l'autre sens) · ↓ : descendre vite · espace : poser d'un coup · C ou Maj : réserve · P ou Échap : pause. Une ligne pleine se casse, et aussi tout groupe de 7 blocs de la même couleur (fusion). Les blocs qui pendent retombent ensuite un par un : de nouvelles lignes ou fusions font des chaînes qui multiplient les points. Les cristaux ne se cassent qu'avec une ligne ; une bombe fait sauter le carré autour d'elle. Marathon, Zen ou 24 défis à trois étoiles, sauvegardés et synchronisés.</div>\n    </div>";
 /*CSS-MOVED*/ const CSS = `.gameBox{display:grid;place-items:center;padding:10px;background:#05010b;box-shadow:0 0 0 3px var(--line2)}
 .gameBox canvas{width:min(100%,1152px);aspect-ratio:384/144;image-rendering:pixelated;cursor:var(--cp,pointer)}
 .gameBox.tall canvas{width:auto;height:min(720px,72vh);aspect-ratio:240/320}
 .gSel{width:auto;font-size:14px;padding:6px 10px;margin-right:8px}
 .tqTile.hole{transition:opacity .4s}
-`;  // le style de ce plugin (il utilise les variables du thème de NeoBase)
+`;  // le style de ce plugin (il utilise les variables du thème de NeoDex)
 export default async function (ctx) {
   const view = ctx.view;
-  if (!ctx.host) { view.textContent = "Ce plugin doit être approuvé par NeoBase pour s'ouvrir."; return; }
+  if (!ctx.host) { view.textContent = "Ce plugin doit être approuvé par NeoDex pour s'ouvrir."; return; }
   const host = ctx.host, { el, toast, sfx, ask, newTab, pixIcon, PIX, WX } = host;
   const folder = ctx.folder, legacy = ctx.legacy || {};
   ctx.host.addStyle(CSS);
@@ -50,7 +50,7 @@ function gameText(g, w, lines, y0) {  // centred pixel-font lines over a dark ba
 const px = (g, color, x, y, w = 1, h = 1) => { g.fillStyle = color; g.fillRect(Math.round(x), Math.round(y), w, h); };
 function sprite(g, rows, x, y, pal) { rows.forEach((r, j) => { for (let i = 0; i < r.length; i++) { const c = pal[r[i]]; if (c) px(g, c, x + i, y + j); } }); }
   // ---- ton code d'origine ----
-/* ---------- jeu "Cascade": a falling-block puzzle of NeoBase's own. Shards of 3 to 5 pixels fall into a 10 x 20 well; a full row breaks,
+/* ---------- jeu "Cascade": a falling-block puzzle of NeoDex's own. Shards of 3 to 5 pixels fall into a 10 x 20 well; a full row breaks,
    and so does any group of 7 blocks of the same colour ("fusion"). After a break the blocks left hanging fall one by one, which can make
    new rows or fusions: chains multiply the score. Crystals (in the challenges) only break with a row, bombs blow up a 3 x 3 square.
    Modes: Marathon (faster every 10 rows), Zen (no speed-up) and 24 challenges with stars. Records and stars in games.json (synced). ---------- */
@@ -103,7 +103,7 @@ function caStart(mode = ca?.kind || 'marathon', level = ca?.levelIdx ?? 0) {
   for (let i = 0; i < 4; i++) ca.next.push(caPiece());
   caSpawn();
   caInfo();
-  gameLoop(ca, 'neodyme:cascade', caUpdate, caDraw);
+  gameLoop(ca, 'neodex:cascade', caUpdate, caDraw);
 }
 function caHeap(h, gems) {  // rows of mixed blocks with holes, settled (nothing hanging, no full row), crystals spread in them
   for (let r = CA.ROWS - h; r < CA.ROWS; r++) {
@@ -327,7 +327,7 @@ function caMenu() {
     ...CA_LEVELS.map(([n, goal], i) => { const unlocked = i === 0 || s.stars[i - 1] || s.stars[i]; return Object.assign(el('option', '', 'Défi ' + (i + 1) + ' · ' + n + ' · ' + caGoalText(goal) + (s.stars[i] ? ' · ' + '★'.repeat(s.stars[i]) : '') + (unlocked ? '' : ' 🔒')), {value: 'c' + i, disabled: !unlocked}); }));
   sel.value = cur;
 }
-function caOpen() { if (!ca) { caStart('marathon', 0); caMenu(); } else gameLoop(ca, 'neodyme:cascade', caUpdate, caDraw); caInfo(); }
+function caOpen() { if (!ca) { caStart('marathon', 0); caMenu(); } else gameLoop(ca, 'neodex:cascade', caUpdate, caDraw); caInfo(); }
 $('caMode').onchange = () => { const v = $('caMode').value; caStart(v.startsWith('c') ? 'challenge' : v, v.startsWith('c') ? +v.slice(1) : 0); caMenu(); $('caCanvas').focus(); };
 $('caCanvas').onclick = () => caPress();
 document.addEventListener('keydown', e => {
