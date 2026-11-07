@@ -1,7 +1,7 @@
 // Cascade : ton appli d'origine (HTML et code inchangés), livrée en plugin.
 // Ses données sont dans le dossier du plugin, que NeoDex sauvegarde (synchro cloud et sauvegardes) ; à la première ouverture elle reprend ce que tu avais dans NeoDex.
 // Elle tourne dans le bac à sable de NeoDex, avec ses outils d'interface (ctx.host) et seulement les autorisations de son plugin.json.
-const HTML = "<div class=\"appWrap\">\n      <div class=\"agHead\"><span class=\"label\">Cascade</span><span class=\"hint\" id=\"caInfo\"></span><div class=\"agNav\"><select class=\"f gSel\" id=\"caMode\" title=\"Mode de jeu\"></select></div></div>\n      <div class=\"gameBox tall\"><canvas id=\"caCanvas\" width=\"240\" height=\"320\" tabindex=\"0\"></canvas></div>\n      <div class=\"hint\">← → ou Q D : déplacer · ↑, X ou W : tourner (Z : dans l'autre sens) · ↓ : descendre vite · espace : poser d'un coup · C ou Maj : réserve · P ou Échap : pause. Une ligne pleine se casse, et aussi tout groupe de 7 blocs de la même couleur (fusion). Les blocs qui pendent retombent ensuite un par un : de nouvelles lignes ou fusions font des chaînes qui multiplient les points. Les cristaux ne se cassent qu'avec une ligne ; une bombe fait sauter le carré autour d'elle. Marathon, Zen ou 24 défis à trois étoiles, sauvegardés et synchronisés.</div>\n    </div>";
+const HTML = "<div class=\"appWrap\">\n      <div class=\"agHead\"><span class=\"label\">Cascade</span><span class=\"hint\" id=\"caInfo\"></span><div class=\"agNav\"><select class=\"f gSel\" id=\"caMode\" title=\"Mode de jeu\"></select></div></div>\n      <div class=\"gameBox tall\"><canvas id=\"caCanvas\" width=\"240\" height=\"320\" tabindex=\"0\"></canvas></div>\n      <div class=\"hint\">← → ou Q D : déplacer · ↑, X ou W : tourner (Z : dans l'autre sens) · ↓ : descendre vite · espace : poser d'un coup · C ou Maj : réserve · P ou Échap : pause. Une ligne pleine se casse, et aussi tout groupe de 9 blocs de la même couleur (fusion). Les blocs qui pendent retombent ensuite un par un : de nouvelles lignes ou fusions font des chaînes qui multiplient les points. Les cristaux ne se cassent qu'avec une ligne ; une bombe fait sauter le carré autour d'elle. Marathon, Zen ou 24 défis à trois étoiles, sauvegardés et synchronisés.</div>\n    </div>";
 /*CSS-MOVED*/ const CSS = `.gameBox{display:grid;place-items:center;padding:10px;background:#05010b;box-shadow:0 0 0 3px var(--line2)}
 .gameBox canvas{width:min(100%,1152px);aspect-ratio:384/144;image-rendering:pixelated;cursor:var(--cp,pointer)}
 .gameBox.tall canvas{width:auto;height:min(720px,72vh);aspect-ratio:240/320}
@@ -53,19 +53,19 @@ function sprite(g, rows, x, y, pal) { rows.forEach((r, j) => { for (let i = 0; i
 /* ---------- jeu "Cascade": a falling-block puzzle of NeoDex's own. Shards of 3 to 5 pixels fall into a 10 x 20 well; a full row breaks,
    and so does any group of 7 blocks of the same colour ("fusion"). After a break the blocks left hanging fall one by one, which can make
    new rows or fusions: chains multiply the score. Crystals (in the challenges) only break with a row, bombs blow up a 3 x 3 square.
-   Modes: Marathon (faster every 10 rows), Zen (no speed-up) and 24 challenges with stars. Records and stars in games.json (synced). ---------- */
+   Modes: Marathon (faster every 8 rows), Zen (no speed-up) and 24 challenges with stars. Records and stars in games.json (synced). ---------- */
 const CA = {W: 240, H: 320, COLS: 10, ROWS: 20, S: 14, X: 10, Y: 24,
   // colours: base, light, dark
   col: [['#ff5ad9', '#ffb0ec', '#a0207e'], ['#7fe0ee', '#d4f8ff', '#2a8a9e'], ['#ffd07a', '#fff0c8', '#b8741c'], ['#8ee8a0', '#d8ffe0', '#2f8f4a'], ['#b46aee', '#e4c8ff', '#5e2aa0'], ['#ff7a4f', '#ffc8b0', '#a8381c']],
   // the shards: 3 to 5 pixels, smaller ones more often
   shapes: [
-    {n: 'I3', w: 3, c: [[0, 0], [1, 0], [2, 0]]}, {n: 'V3', w: 3, c: [[0, 0], [0, 1], [1, 1]]},
+    {n: 'I3', w: 1.5, c: [[0, 0], [1, 0], [2, 0]]}, {n: 'V3', w: 1.5, c: [[0, 0], [0, 1], [1, 1]]},
     {n: 'I4', w: 2, c: [[0, 0], [1, 0], [2, 0], [3, 0]]}, {n: 'O4', w: 2, c: [[0, 0], [1, 0], [0, 1], [1, 1]]}, {n: 'T4', w: 2, c: [[0, 0], [1, 0], [2, 0], [1, 1]]},
     {n: 'L4', w: 2, c: [[0, 0], [0, 1], [0, 2], [1, 2]]}, {n: 'Z4', w: 2, c: [[0, 0], [1, 0], [1, 1], [2, 1]]},
     {n: 'P5', w: 1, c: [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2]]}, {n: 'U5', w: 1, c: [[0, 0], [2, 0], [0, 1], [1, 1], [2, 1]]}, {n: 'X5', w: .5, c: [[1, 0], [0, 1], [1, 1], [2, 1], [1, 2]]},
     {n: 'L5', w: .7, c: [[0, 0], [0, 1], [0, 2], [0, 3], [1, 3]]}, {n: 'Y5', w: .7, c: [[1, 0], [0, 1], [1, 1], [1, 2], [1, 3]]},
   ],
-  FUSE: 7, LOCK: 30, MOVES: 15,
+  FUSE: 9, LOCK: 24, MOVES: 10,  // moins facile : il faut 9 blocs d'une couleur, moins de temps pour glisser une pièce posée
 };
 // the 24 challenges: goals in rows, crystals, fusions, chains or score, with a starting heap for some
 const CA_LEVELS = [
@@ -89,7 +89,7 @@ function caBag() {  // shapes drawn by weight, never three times the same in a r
   for (;;) { let r = Math.random() * tot; const s = CA.shapes.find(s => (r -= s.w) < 0) || CA.shapes[0]; const h = ca.hist; if (!(h[0] === s.n && h[1] === s.n)) { h.unshift(s.n); h.length = 2; return s; } }
 }
 function caPiece() {
-  const s = caBag(), c = Math.floor(Math.random() * CA.col.length), bomb = ++ca.count % 14 === 0 ? Math.floor(Math.random() * s.c.length) : -1;
+  const s = caBag(), c = Math.floor(Math.random() * CA.col.length), bomb = ++ca.count % 22 === 0 ? Math.floor(Math.random() * s.c.length) : -1;
   return {cells: s.c.map(p => [...p]), color: c, bomb, n: s.n};
 }
 function caStart(mode = ca?.kind || 'marathon', level = ca?.levelIdx ?? 0) {
@@ -122,7 +122,7 @@ function caHeap(h, gems) {  // rows of mixed blocks with holes, settled (nothing
   for (let i = 0; i < gems && spots.length; i++) { const [r, c] = spots.splice(Math.floor(Math.random() * spots.length), 1)[0]; ca.board[r][c] = {c: -1, gem: true}; }
   ca.gemsTotal = gems;
 }
-const caSpeed = () => Math.max(2, Math.round(48 * Math.pow(.8, ca.level - 1)));  // frames per row
+const caSpeed = () => Math.max(2, Math.round(42 * Math.pow(.78, ca.level - 1)));  // frames per row
 const caFits = (cells, x, y) => cells.every(([cx, cy]) => { const X = x + cx, Y = y + cy; return X >= 0 && X < CA.COLS && Y < CA.ROWS && (Y < 0 || !ca.board[Y][X]); });
 function caSpawn() {
   const p = ca.next.shift(); ca.next.push(caPiece());
@@ -182,7 +182,7 @@ function caResolve() {
   const lvl = ca.level, base = [0, 100, 300, 500, 800][Math.min(4, f.rows)] + Math.max(0, f.rows - 4) * 400, mult = 1 + (ca.chain - 1) * .5;
   const pts = Math.round((base * lvl + f.fusions * 60 * f.hit.size / CA.FUSE + gems * 150 + bombs * 100) * mult);
   ca.score += pts; ca.rows += f.rows; ca.fusions += f.fusions; ca.gems += gems; ca.bestChain = Math.max(ca.bestChain, ca.chain);
-  if (ca.kind === 'marathon') ca.level = 1 + Math.floor(ca.rows / 10);
+  if (ca.kind === 'marathon') ca.level = 1 + Math.floor(ca.rows / 8);
   const label = [f.rows > 1 ? f.rows + ' LIGNES' : f.rows ? 'LIGNE' : '', f.fusions ? 'FUSION' + (f.fusions > 1 ? ' x' + f.fusions : '') : '', bombs ? 'BOUM' : '', ca.chain > 1 ? 'CHAÎNE x' + ca.chain : ''].filter(Boolean).join(' · ');
   ca.pops.push({text: label, pts, t: 70});
   ca.clearing = f.hit; ca.phase = 'clear'; ca.anim = 0; ca.shake = bombs ? 10 : f.rows >= 3 ? 5 : 0;
