@@ -1,9 +1,9 @@
 {
   "pluginId": "neodex.cascade",
   "repo": "NDesumeur/neodex-plugin-cascade",
-  "version": "1.1.1",
-  "sha256": "ece98c326765f008b8fa95d6dd21208e877d3fb4aef1836a844dfd72c9bb8112",
-  "approvedAt": "2026-11-06T21:35:47.970Z",
+  "version": "1.1.2",
+  "sha256": "c92c12589176880a10160ee64b173017aedfa0fcfd4e54347606c977d1bc815c",
+  "approvedAt": "2026-11-07T13:39:25.876Z",
   "neobase": ">=4.0.0",
-  "signature": "bSGGn21P1/pA9vfkwjRlbDg+ZFfXlKIZ3NIUjPskGVEzGEg/rqxqvF/1sgGuGTYlFOT8UDgOu55/einlW/D6BA=="
+  "signature": "zl1IPYYJL67Im1RIo0UajXBFjzo3/fR7HQTxZSdWpY35ce866K0fRbrj9UdPjHunBmPPeZzB6kaViM5j5+QoDg=="
 }
